@@ -321,6 +321,76 @@ nginxの静的ファイルの配信、アプリとどっちが優先されるん
 jsとかも静的ファイルにした
 {"pass":true,"score":18090,"success":17310,"fail":0,"messages":[]}
 
-時間切れ。
+
+bash起動してsha512計算していたのをgoで計算する
+起動特定の起動オプション付いてる時はサーバ立ち上げないモード便利
+
+{"pass":true,"score":19782,"success":18867,"fail":0,"messages":[]}
+
+
+
+getIndexのチューニング
+
+INNER JOINでdel_flgみながらLIMITを絞る
+
+ベンチマーカーが重くなってきた
+```
+ 9358 mysql     20   0 1207352 104888  10652 S  79.1 10.3   0:16.66 mysqld
+ 9531 isucon    20   0  232456  35676   6816 S  73.8  3.5   0:15.00 benchmarker
+ 9494 isucon    20   0  344712 138192   6712 S  33.6 13.5   0:07.99 app
+```
+
+{"pass":true,"score":26041,"success":23558,"fail":0,"messages":[]}
+
+まだindexが遅い。
+user一覧をループでとってきているっぽいな
+でもこれユーザ名しか使ってなさそう
+
+{"pass":true,"score":26372,"success":23732,"fail":0,"messages":[]}
+
+かわんねーｗ
+
+クエリの回数を減らす
+{"pass":true,"score":28379,"success":25595,"fail":0,"messages":[]}
+
+なんかベンチマーカーが一番CPU使うようになってしまった。。
+
+getIndexのpostsのクエリの結果を保持しておいて新しい画像が来たら更新。
+del_flgの更新ができてないけど大丈夫なのこれ
+{"pass":true,"score":32649,"success":28937,"fail":0,"messages":[]}
+
+なんかメモリ足りなくて落ちるw
+http://qiita.com/na0AaooQ/items/278a11ed905995bd16af
+を参考にスワップ領域を1GB確保
+
+r.ParseMultipartForm(1024) をpostIndexに追加
+全然メモリ使わなくなった。
+
+{"pass":true,"score":33484,"success":29983,"fail":0,"messages":[]}
+
+安定した
+
+```
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+31559 mysql     20   0 1215576 118640  10652 S  37.6 11.6   0:12.22 mysqld
+31729 isucon    20   0  178264  55252   6596 S 117.8  5.4   0:29.24 benchmarker
+31659 isucon    20   0  238724  33580   6428 S  28.3  3.3   0:09.13 app
+```
+
+getPostsは時刻指定してるけど全部返してよかった。getIndexと同じものを返してSQL発行数を減らす
+{"pass":true,"score":34691,"success":30693,"fail":0,"messages":[]}
+
+
+memcacheつかわないでクッキーつかう
+{"pass":true,"score":35512,"success":31390,"fail":0,"messages":[]}
+
+slow_logを消した あんまりかわんない
+{"pass":true,"score":35935,"success":31742,"fail":0,"messages":[]}
+
+@userを早くした
+{"pass":true,"score":36363,"success":32133,"fail":0,"messages":[]}
+
+なんかもうベンチマーカーがcpuくいすぎてスコア上がらないや
+まだいけそうだけど一旦ここで終了
 
 
