@@ -394,3 +394,21 @@ slow_logを消した あんまりかわんない
 まだいけそうだけど一旦ここで終了
 
 
+再開
+getIndexのテンプレートを高速化
+{"pass":true,"score":40175,"success":35254,"fail":0,"messages":[]}
+
+postIndexを若干高速化
+{"pass":true,"score":41881,"success":33553,"fail":0,"messages":[]}
+
+頭打ちになってきた。 。
+
+nginxでキャッシュの設定
+  location /image/ {
+    root /home/isucon/work/webapp;
+    expires max;
+    add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+  }
+{"pass":true,"score":168778,"success":157132,"fail":0,"messages":[]}
+
+
