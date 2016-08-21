@@ -97,3 +97,5 @@ go tool pprof -svg webapp/golang/app /tmp/mem.pprof > mem.svg
 go tool pprof -svg webapp/golang/app /tmp/block.pprof > block.svg
 ```
 
+基本はcpuプロファイルの`list main.`を見る  
+気になったタイミングでsvgなどを見て明らかに変なところが無いか見るくらいの使い方でよさそう.
