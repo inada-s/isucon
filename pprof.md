@@ -29,7 +29,7 @@ http.pprofだとcpuプロファイル30秒ブロックしてしまう
 秒数指定できるけど、今から開始したい、今終了したい、といった使い方には向いていない.  
 runtime.pprofのほうが柔軟に対応できる
 
-`/startprofile`でプロファイル開始、`/endprofile`でプロファイル終了をする例.  
+`/startprof`でプロファイル開始、`/endprof`でプロファイル終了をする例.  
 isuconのベンチマークスクリプトを間に挟めば一回のベンチマーク分を綺麗に引きぬくことができる.
 
 ### 使用時のテンプレ
@@ -50,7 +50,7 @@ go func() {
 	log.Println(http.ListenAndServe("localhost:6060", nil))
 }()
 
-http.HandleFunc("/startprofile", func(w http.ResponseWriter, r *http.Request) {
+http.HandleFunc("/startprof", func(w http.ResponseWriter, r *http.Request) {
         f, err := os.Create(cpuProfileFile)
         if err != nil {
                 w.Write([]byte(err.Error()))
@@ -64,7 +64,7 @@ http.HandleFunc("/startprofile", func(w http.ResponseWriter, r *http.Request) {
         w.Write([]byte("profile started\n")) 
 })
 
-http.HandleFunc("/stopprofile", func(w http.ResponseWriter, r *http.Request) {
+http.HandleFunc("/endprof", func(w http.ResponseWriter, r *http.Request) {
         pprof.StopCPUProfile()
         runtime.SetBlockProfileRate(0)
         w.Write([]byte("profile ended\n"))
