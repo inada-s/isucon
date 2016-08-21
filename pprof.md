@@ -85,9 +85,15 @@ http.HandleFunc("/endprof", func(w http.ResponseWriter, r *http.Request) {
 })
 ```
 
+ベンチマークスクリプトにこんな感じで
 ```sh
-go tool pprof /tmp/mem.pprof
-go tool pprof /tmp/cpu.pprof
-go tool pprof /tmp/block.pprof
+./restart
+sleep 3
+curl http://localhost:6060/startprof
+/home/isucon/work/benchmarker -t http://127.0.0.1/ -u /home/isucon/work/userdata
+curl http://localhost:6060/endprof
+go tool pprof -svg webapp/golang/app /tmp/cpu.pprof > cpu.svg
+go tool pprof -svg webapp/golang/app /tmp/mem.pprof > mem.svg
+go tool pprof -svg webapp/golang/app /tmp/block.pprof > block.svg
 ```
-↑未確認
+
