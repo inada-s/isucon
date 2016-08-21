@@ -3,7 +3,7 @@ sudo apt-get update
 sudo apt-get install -f -y \
         git vim curl wget tmux git tree make \
         python-dev python-pip python3-dev python3-pip \
-        unzip zip zlib1g-dev make aptitude 
+        unzip zip zlib1g-dev aptitude graphviz
 sudo aptitude install -y vim-gnome
 
 
