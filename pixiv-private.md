@@ -404,11 +404,14 @@ postIndexを若干高速化
 頭打ちになってきた。 。
 
 nginxでキャッシュの設定
+```
   location /image/ {
     root /home/isucon/work/webapp;
     expires max;
     add_header Cache-Control "public, must-revalidate, proxy-revalidate";
   }
+```
+
 {"pass":true,"score":168778,"success":157132,"fail":0,"messages":[]}
 
 
