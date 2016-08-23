@@ -1,11 +1,8 @@
 import csv
 import os
-import StringIO
 
-dstat_csv_path = '/tmp/dstat.csv'
-
-def dstat_report():
-    if not os.path.exists(dstat_csv_path):
+def parse_dstat_report():
+    if not os.path.exists('dstat.csv'):
         print 'dstat file not found.'
         return
 
@@ -54,16 +51,10 @@ def dstat_report():
 
     return make_csv('cpu', 0, -2), make_csv('mem'), make_csv('net')
 
-def main():
-    cpu_csv, mem_csv, net_csv = dstat_report()
+def print_dstat_report():
+    cpu_csv, mem_csv, net_csv = parse_dstat_report()
 
     print u"""
-    <!DOCTYPE HTML>
-    <html>
-      <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-      <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
       <script type="text/javascript">
       google.charts.load('current', {'packages':['corechart']});
       google.charts.setOnLoadCallback(drawChart);
@@ -125,21 +116,125 @@ def main():
 
     print """
      }
+     </script>
     """
 
+def split_by_rountine(lines):
+    reports = []
+    title = ""
+    value = 0
+    content = []
+    for line in lines:
+        if line.startswith("ROUTINE ====="):
+            if content:
+                reports.append((value, title, content))
+            title = line.split()[2]
+            content = []
+            value = -1
+        elif line.strip().endswith("% of Total"):
+            value = float(line.split()[-3][:-1])
+        else:
+            content.append(line)
+    if content:
+        reports.append((value, title, content))
+    reports.sort(key=lambda x: x[0], reverse=True)
+    return reports
+
+def print_app_profiles():
+    print "<h2>CPU Profile</h2>"
+    print """<a href="cpu.svg">SVG</a>"""
+    with open('cpu.txt') as f:
+        lines = f.readlines()
+        print """<pre class="prettyprint">"""
+        for line in lines[:min(20, len(lines))]:
+            print line,
+        print "</pre>"
+    with open('cpu-cum.txt') as f:
+        lines = f.readlines()
+        print """<pre class="prettyprint">"""
+        for line in lines[:min(20, len(lines))]:
+            print line,
+        print "</pre>"
+    with open('cpu.list') as f:
+        for rountine in split_by_rountine(f)[:5]:
+            print "<h3>", rountine[0], "% ", rountine[1], "</h3>"
+            print """<pre class="prettyprint">"""
+            for line in rountine[2]:
+                print line,
+            print "</pre>"
+
+    print "<h2>MEM Profile</h2>"
+    print """<a href="mem.svg">SVG</a>"""
+    with open('mem.txt') as f:
+        lines = f.readlines()
+        print """<pre class="prettyprint">"""
+        for line in lines[:min(20, len(lines))]:
+            print line,
+        print "</pre>"
+    with open('mem-cum.txt') as f:
+        lines = f.readlines()
+        print """<pre class="prettyprint">"""
+        for line in lines[:min(20, len(lines))]:
+            print line,
+        print "</pre>"
+    with open('mem.list') as f:
+        for rountine in split_by_rountine(f)[:5]:
+            print "<h3>", rountine[0], "% ", rountine[1], "</h3>"
+            print """<pre class="prettyprint">"""
+            for line in rountine[2]:
+                print line,
+            print "</pre>"
+
+    print "<h2>BLOCK Profile</h2>"
+    print """<a href="block.svg">SVG</a>"""
+    with open('block.txt') as f:
+        lines = f.readlines()
+        print """<pre class="prettyprint">"""
+        for line in lines[:min(20, len(lines))]:
+            print line,
+        print "</pre>"
+    with open('block-cum.txt') as f:
+        lines = f.readlines()
+        print """<pre class="prettyprint">"""
+        for line in lines[:min(20, len(lines))]:
+            print line,
+        print "</pre>"
+    with open('block.list') as f:
+        for rountine in split_by_rountine(f)[:5]:
+            print "<h3>", rountine[0], "% ", rountine[1], "</h3>"
+            print """<pre class="prettyprint">"""
+            for line in rountine[2]:
+                print line,
+            print "</pre>"
+
+def main():
+    os.chdir(sys.argv[1])
     print u"""
-    </script>
-      </head>
-      <body>
-        <div class="container">
-        <h1>Benchmark Report</h1>
+<!DOCTYPE HTML>
+<html>
+  <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" 
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+"""
+    print_dstat_report()
+    print u"""
+  </head>
+  <body>
+    <div class="container">
+	<h1>Benchmark Report</h1>
 	<div id="charts" class="row"></div>
-        </div>
-      </body>
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    </html>
-    """
+"""
+    print_app_profiles()
+    print u"""
+    </div>
+  </body>
+  <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</html>
+"""
 
 if __name__ == '__main__':
     main()
