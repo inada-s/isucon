@@ -1,0 +1,29 @@
+#!/bin/bash
+cd $(dirname $0)
+BENCH_DIR=$(pwd)/bench-$(date '+%Y%m%d%H%M%S')
+mkdir -p $BENCH_DIR
+
+./restart
+sleep 3
+dstat -tam --output=$BENCH_DIR/dstat.csv >/dev/null 2>&1 & 
+echo $! > dstat.pid
+curl http://localhost:6060/startprof
+/home/isucon/work/benchmarker -t http://127.0.0.1/ -u /home/isucon/work/userdata | tee $BENCH_DIR/bench.txt
+curl http://localhost:6060/endprof
+kill $(cat dstat.pid)
+./report > $BENCH_DIR/summary.txt
+go tool pprof -svg webapp/golang/app /tmp/cpu.pprof > $BENCH_DIR/cpu.svg
+go tool pprof -svg webapp/golang/app /tmp/mem.pprof > $BENCH_DIR/mem.svg
+go tool pprof -svg webapp/golang/app /tmp/block.pprof > $BENCH_DIR/block.svg
+go tool pprof -text webapp/golang/app /tmp/cpu.pprof > $BENCH_DIR/cpu.txt
+go tool pprof -text webapp/golang/app /tmp/mem.pprof > $BENCH_DIR/mem.txt
+go tool pprof -text webapp/golang/app /tmp/block.pprof > $BENCH_DIR/block.txt
+go tool pprof -text -cum webapp/golang/app /tmp/cpu.pprof > $BENCH_DIR/cpu-cum.txt
+go tool pprof -text -cum webapp/golang/app /tmp/mem.pprof > $BENCH_DIR/mem-cum.txt
+go tool pprof -text -cum webapp/golang/app /tmp/block.pprof > $BENCH_DIR/block-cum.txt
+go tool pprof -list=main. webapp/golang/app /tmp/cpu.pprof > $BENCH_DIR/cpu.list
+go tool pprof -list=main. webapp/golang/app /tmp/mem.pprof > $BENCH_DIR/mem.list
+go tool pprof -list=main. webapp/golang/app /tmp/block.pprof > $BENCH_DIR/block.list
+sudo mysqldumpslow -t 10 -s t /var/log/mysql/mysql-slow.log > $BENCH_DIR/mysql.txt
+python make_report.py $BENCH_DIR > $BENCH_DIR/index.html
+ln -nfs $BENCH_DIR bench-latest
