@@ -184,7 +184,7 @@ def split_by_rountine(lines):
     return reports
 
 def print_app_profiles(out):
-    out.write("""<h2>CPU Profile (<a href="cpu.svg">SVG</a>)</h2>""")
+    out.write("""<h2>CPU Profile (<a href="cpu.svg">pprof SVG</a>) (<a href="cpu-torch.svg">FlameGraph SVG</a>)</h2>""")
     with open('cpu.txt') as f:
         lines = f.readlines()
         out.write("""<pre class="prettyprint">""")
@@ -206,7 +206,7 @@ def print_app_profiles(out):
                 out.write(line[10:])
             out.write("</pre>")
 
-    out.write("""<h2>MEM Profile (<a href="mem.svg">SVG</a>)</h2>""")
+    out.write("""<h2>MEM Profile (<a href="mem.svg">pprof SVG</a>) (<a href="mem-torch.svg">FlameGraph SVG</a>)</h2>""")
     with open('mem.txt') as f:
         lines = f.readlines()
         out.write("""<pre class="prettyprint">""")
@@ -228,7 +228,7 @@ def print_app_profiles(out):
                 out.write(line[10:])
             out.write("</pre>")
 
-    out.write("""<h2>BLOCK Profile (<a href="block.svg">SVG</a>)</h2>""")
+    out.write("""<h2>BLOCK Profile (<a href="block.svg">pprof SVG</a>) (<a href="block-torch.svg">FlameGraph SVG</a>)</h2>""")
     with open('block.txt') as f:
         lines = f.readlines()
         out.write("""<pre class="prettyprint">""")
