@@ -63,4 +63,14 @@ http {
 
 # mysql
 
+パスワード無しでログインできるようにする.
+```
+skip-grant-tables
+```
+
+
+```
+innodb_flush_log_at_trx_commit = 0
+```
+
 # golang
