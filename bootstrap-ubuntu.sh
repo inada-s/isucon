@@ -1,11 +1,12 @@
 # INSATALL tools
 sudo apt-get update
-sudo apt-get install -f -y \
-        git vim curl wget tmux git tree make \
-        python-dev python-pip python3-dev python3-pip \
-        unzip zip zlib1g-dev aptitude graphviz
-sudo aptitude install -y vim-gnome
+sudo apt-get install -f -y git vim curl wget tmux git tree make python-dev python-pip python3-dev python3-pip unzip zip graphviz 
 
+# INSTALL FlameGraph
+wget https://github.com/brendangregg/FlameGraph/archive/master.zip
+unzip master.zip
+sudo mv FlameGraph-master/* /usr/local/bin/
+rm -rf FlameGraph-master
 
 # INSTALL golang
 wget https://storage.googleapis.com/golang/go1.7.linux-amd64.tar.gz
