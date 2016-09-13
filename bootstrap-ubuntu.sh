@@ -1,6 +1,6 @@
 # INSATALL tools
 sudo apt-get update
-sudo apt-get install -f -y git vim curl wget tmux git tree make python-dev python-pip python3-dev python3-pip unzip zip graphviz 
+sudo apt-get install -f -y git curl screen wget tmux git tree make python-dev python-pip python3-dev python3-pip unzip zip graphviz 
 
 # INSTALL FlameGraph
 wget https://github.com/brendangregg/FlameGraph/archive/master.zip
