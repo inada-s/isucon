@@ -49,14 +49,21 @@ http {
   gzip_types text/css text/javascript;
   # Viaヘッダ(前段にキャッシュサーバやCDNが存在する場合に付く)が付いていてもgzip圧縮する
   gzip_proxied any;
-	
-	
-  location ~* \.(css|js)$ {
-    gzip_static always;
-    gunzip on;
-  }
   
+  upstream app {
+    server 127.0.0.1:8080;
+  }
+
   server {
+    location ~* \.(css|js)$ {
+      gzip_static always;
+      gunzip on;
+    }
+
+    location / {
+      proxy_set_header Host $host;
+      proxy_pass http://app;
+    }
   }
 }
 ```
