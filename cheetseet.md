@@ -15,6 +15,10 @@ pid /run/nginx.pid;
 # OSレベルで扱えるディスクリプター総数である、/proc/sys/fs/file-maxを参考に設定する.
 worker_rlimit_nofile 9000;
 
+events {
+  worker_connections  1024;
+}
+
 http {
   log_format  isucon '$time_local $msec\t$status\treqtime:$request_time\t'
                        'in:$request_length\tout:$bytes_sent\trequest:$request\t'
