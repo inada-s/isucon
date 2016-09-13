@@ -1,0 +1,21 @@
+#!/bin/bash
+rm -rf ~/htmldump/tmp
+mkdir -p ~/htmldump/ref
+mkdir -p ~/htmldump/tmp
+
+cd ~/htmldump/tmp
+if [ "$1" = "ref" ]; then
+  cd ~/htmldump/ref
+fi
+
+rm cookie.txt
+curl localhost/initialize
+CURL="curl -L -c cookie.txt "
+$CURL localhost/login > get-login.html
+$CURL -F "email=edwardo3657@isucon.net" -F "password=edwardo3657" localhost/login > post-login.html
+
+if [ "$1" != "ref" ]; then
+  ls ~/htmldump/ref | while read line; do
+    diff -u ~/htmldump/ref/$line ~/htmldump/tmp/$line
+  done
+fi
