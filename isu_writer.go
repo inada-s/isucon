@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html"
 	"io"
 	"reflect"
@@ -28,4 +29,8 @@ func (m IsuWriter) WriteString(s string) (n int, err error) {
 
 func (m IsuWriter) WriteEscString(s string) (n int, err error) {
 	return m.WriteString(html.EscapeString(s))
+}
+
+func (m IsuWriter) Print(v interface{}) (n int, err error) {
+	return m.WriteString(fmt.Sprint(v))
 }
