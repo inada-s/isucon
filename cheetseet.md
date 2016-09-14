@@ -90,3 +90,162 @@ skip-innodb_doublewrite
 ```
 
 # golang
+## コンフリクトしにくい編集
+同じパッケージ内に新しくファイルを作って実装する.  
+そこで作った関数をメインのgoファイルで呼び出す形にする.
+
+## データのオンメモリ化
+データの使い方を良く見て考えてデータ構造を作る.
+
+頻出として map[PK]Value がある.  
+mutexとmapで持って, のGet, Set, Updateの関数を提供し直接mapを触らない形がハマらないで済みそう.  
+ポインタを使うとメモリやコピーコストを節約できるかもしれないけど, ハマらないで済むので基本オブジェクトをそのまま持つ.  
+DBを操作する部分を調べて関数を差しこむなり入れ替えるなり.
+
+```
+var (
+	userRepoM sync.Mutex
+	userRepo  map[int]User
+)
+
+func userAdd(u User) {
+	userRepoM.Lock()
+	userRepo[u.ID] = u
+	userRepoM.Unlock()
+}
+
+func userGet(uid int) User {
+	userRepoM.Lock()
+	u := userRepo[uid]
+	userRepoM.Unlock()
+	return u
+}
+
+func userBan(uid, ban int) {
+	userRepoM.Lock()
+	u := userRepo[uid]
+	u.DelFlg = ban
+	userRepo[uid] = u
+	userRepoM.Unlock()
+}
+
+func usersReset() {
+	userRepoM.Lock()
+	defer userRepoM.Unlock()
+
+	userRepo = make(map[int]User)
+	users := []User{}
+	err := db.Select(&users, "SELECT * FROM users")
+	if err != nil {
+		panic(err)
+	}
+	for _, u := range users {
+		userRepo[u.ID] = u
+	}
+}
+```
+
+## セッションストアのオンメモリ化
+"github.com/gorilla/sessions" のオンメモリバージョン  
+ちょっと書き換えれば他のライブラリにも対応可能.
+
+メモリに余裕があるならユーザ情報まるまるセッションにも持っておくと良さそう
+```
+const sessionName = "isucon_session"
+
+type Session struct {
+	Key string
+
+	UserId int
+	User   User
+	Notice string
+}
+
+func (s *Session) Save(r *http.Request, w http.ResponseWriter) {
+	sessionStore.Set(w, s)
+}
+
+type SessionStore struct {
+	sync.Mutex
+	store map[string]*Session
+}
+
+var sessionStore = SessionStore{
+	store: make(map[string]*Session),
+}
+
+func (self *SessionStore) Get(r *http.Request) *Session {
+	cookie, _ := r.Cookie(sessionName)
+	if cookie == nil {
+		return &Session{}
+	}
+	key := cookie.Value
+	self.Lock()
+	s := self.store[key]
+	self.Unlock()
+	if s == nil {
+		s = &Session{}
+	}
+	return s
+}
+
+func (self *SessionStore) Set(w http.ResponseWriter, sess *Session) {
+	key := sess.Key
+	if key == "" {
+		b := make([]byte, 8)
+		rand.Read(b)
+		key = hex.EncodeToString(b)
+		sess.Key = key
+	}
+
+	cookie := sessions.NewCookie(sessionName, key, &sessions.Options{})
+	http.SetCookie(w, cookie)
+
+	self.Lock()
+	self.store[key] = sess
+	self.Unlock()
+}
+```
+
+
+## レンダリング結果のキャッシュ
+例えば非ログインユーザの場合同じ結果を返すリクエストの場合, レンダリング結果をキャッシュしておくことができる.  
+他にもコンテンツ1つ1つに対してレンダリング結果を保持しておき, レンダリング回数を減らすことができるケースがある.  
+
+また, isuconのレギュレーションではしばしば, 更新系リクエストの結果が他のGETに反映されるまでに1秒程度猶予がある.  
+この場合対象となるGETリクエストでは, 余裕持って0.5秒に1回レンダリングすればよく, ベンチマーク1分だとすると120回しかレンダリングしなくて済む.
+
+1秒猶予のレギュレーションが無い場合, 毎回レンダリングすることになるが, 更新系リクエストのレスポンスを返す前にレンダリングしてしまえばいい.
+
+```
+var (
+	indexRenderedMtx sync.Mutex
+	indexRendered    []byte
+)
+
+func updateIndexRendered() {
+	var b bytes.Buffer
+	indexTemplate.Execute(&b, ...)
+}
+
+...
+// 0.5秒毎に更新する場合
+func updateIndexRenderedLoop() {
+	for {
+		time.Sleep(500 * time.Millisecond)
+		updateIndexRendered()
+	}
+}
+```
+
+
+## テンプレートエンジン撲滅
+DB周りの基本的なチューニングが済んでくるとたいてい, テンプレートエンジンのレンダリング時間が占める割合が増えてくる.  
+便利スクリプトを用意しておき, 機械的に置換してく.
+
+go run tpl_conv.go < index.html > index.gotpl
+
+あとは手修正でがんばる.
+
+
+
