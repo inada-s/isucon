@@ -28,7 +28,7 @@ func run(r io.Reader, w io.Writer) {
 			left = i
 			i++
 			if open {
-				w.Write([]byte("`)"))
+				w.Write([]byte(`")`))
 				open = false
 			}
 		} else if token == rightDelim {
@@ -45,8 +45,11 @@ func run(r io.Reader, w io.Writer) {
 				continue
 			}
 			if !open {
-				w.Write([]byte("iw.WriteString(`"))
+				w.Write([]byte(`iw.WriteString("`))
 				open = true
+			}
+			if body[i] == '"' {
+				w.Write([]byte(`\`))
 			}
 			w.Write(body[i : i+1])
 		}
