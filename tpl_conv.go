@@ -41,12 +41,13 @@ func run(r io.Reader, w io.Writer) {
 			if token == "  " {
 				continue
 			}
-			if body[i] == '\n' {
-				continue
-			}
 			if !open {
 				w.Write([]byte(`iw.WriteString("`))
 				open = true
+			}
+			if body[i] == '\n' {
+				w.Write([]byte(`\n`))
+				continue
 			}
 			if body[i] == '"' {
 				w.Write([]byte(`\`))
@@ -55,7 +56,7 @@ func run(r io.Reader, w io.Writer) {
 		}
 	}
 	if open {
-		w.Write([]byte("`)\n"))
+		w.Write([]byte(`")`))
 		open = false
 	}
 }
