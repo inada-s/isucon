@@ -1,17 +1,16 @@
 #!/bin/bash -x
-DIFF='diff -uBw'
-if [[ -x `which colordiff` ]]; then
-    DIFF='colordiff -uBw'
-fi
+SCRIPT_DIR=$(cd $(dirname $0) && pwd)
+cd $SCRIPT_DIR
 
-rm -rf ~/htmldump/tmp
-mkdir -p ~/htmldump/ref
-mkdir -p ~/htmldump/tmp
+mkdir -p ./htmldump/tmp
+mkdir -p ./htmldump/ref
 
-cd ~/htmldump/tmp
 if [ "$1" = "ref" ]; then
-  cd ~/htmldump/ref
-  rm ./*
+  rm ./htmldump/ref/*
+  cd ./htmldump/ref
+else
+  rm ./htmldump/tmp/*
+  cd ./htmldump/tmp
 fi
 
 #curl localhost/initialize
@@ -22,8 +21,14 @@ $CURL localhost/mypage -o get-mypage.html
 $CURL localhost -o get-index2.html
 $CURL localhost/report -o get-report.html
 
+DIFF='diff -uBw'
+if [[ -x `which colordiff` ]]; then
+    DIFF='colordiff -uBw'
+fi
+
 if [ "$1" != "ref" ]; then
-  ls ~/htmldump/ref | grep -v "cookie.txt" | while read line; do
-    $DIFF -uBw ~/htmldump/ref/$line ~/htmldump/tmp/$line
+  cd $SCRIPT_DIR
+  ls ./htmldump/ref | grep -v "cookie.txt" | while read line; do
+    $DIFF -uBw ./htmldump/ref/$line ./htmldump/tmp/$line
   done
 fi

@@ -1,5 +1,7 @@
 #!/bin/bash
-cd $(dirname $0)
+SCRIPT_DIR=$(cd $(dirname $0) && pwd)
+cd $SCRIPT_DIR
+
 BENCH_DIR=$(pwd)/bench-$(date '+%Y%m%d%H%M%S')
 mkdir -p $BENCH_DIR
 
