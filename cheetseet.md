@@ -78,6 +78,10 @@ http {
 }
 ```
 
+## 参考になるかも
+- https://github.com/kazeburo/isucon3qualifier-myhack/blob/master/conf/nginx.conf
+
+
 # mysql
 
 ## isucon向け設定
