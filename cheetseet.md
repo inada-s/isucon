@@ -74,6 +74,7 @@ http {
 
 # mysql
 
+## isucon向け設定
 ```
 skip-grant-tables
 #innodb_read_io_threads=4
@@ -88,6 +89,23 @@ innodb_flush_method=O_DIRECT
 innodb_flush_log_at_trx_commit=0
 skip-innodb_doublewrite
 ```
+
+## インデックス
+追加
+```
+ALTER TABLE posts ADD INDEX created_at_idx(created_at);
+```
+
+複合インデックス
+```
+ALTER TABLE posts ADD INDEX index_posts_on_created_at_updated_at(created_at, updated_at);
+```
+
+削除
+```
+ALTER TABLE posts DROP INDEX created_at_idx;
+```
+
 
 # golang
 ## コンフリクトしにくい編集
