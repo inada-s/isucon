@@ -13,10 +13,10 @@ pid /run/nginx.pid;
 
 # ワーカーの扱う最大ファイルディスクリプター数.
 # OSレベルで扱えるディスクリプター総数である、/proc/sys/fs/file-maxを参考に設定する.
-worker_rlimit_nofile 9000;
+worker_rlimit_nofile 65536;
 
 events {
-  worker_connections  1024;
+  worker_connections  65536;
 }
 
 http {
