@@ -56,21 +56,31 @@ http {
   
   upstream app {
     server 127.0.0.1:8080;
+    keepalive 32; 
+
+    # unix domain socketに変更した場合.
+    #server unix:/tmp/app.sock;
   }
 
   server {
     location ~* \.(css|js)$ {
-      gzip_static always;
-      gunzip on;
+      #gzip_static always;
+      #gunzip on;
     }
 
     location / {
+      proxy_set_header Connection ""; #app/keepalive の為に必要
+      proxy_http_version 1.1; #app/keepalive の為に必要
       proxy_set_header Host $host;
       proxy_pass http://app;
     }
   }
 }
 ```
+
+## 参考になるかも
+- https://github.com/kazeburo/isucon3qualifier-myhack/blob/master/conf/nginx.conf
+
 
 # mysql
 
