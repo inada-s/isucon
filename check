@@ -1,4 +1,9 @@
 #!/bin/bash -x
+DIFF='diff -uBw'
+if [[ -x `which colordiff` ]]; then
+    DIFF='colordiff -uBw'
+fi
+
 rm -rf ~/htmldump/tmp
 mkdir -p ~/htmldump/ref
 mkdir -p ~/htmldump/tmp
@@ -6,16 +11,19 @@ mkdir -p ~/htmldump/tmp
 cd ~/htmldump/tmp
 if [ "$1" = "ref" ]; then
   cd ~/htmldump/ref
+  rm ./*
 fi
 
-rm cookie.txt
-curl localhost/initialize
-CURL="curl -L -c cookie.txt -w %{time_total} "
-$CURL localhost/login -o get-login.html
-$CURL -F "email=edwardo3657@isucon.net" -F "password=edwardo3657" localhost/login -o post-login.html
+#curl localhost/initialize
+CURL="curl -sSLc cookie.txt -w %{time_total}\\n"
+$CURL localhost -o get-index.html
+$CURL -d "login=isucon1" -d "password=isuconpass1" http://localhost/login -o post-login-ok.html
+$CURL localhost/mypage -o get-mypage.html
+$CURL localhost -o get-index2.html
+$CURL localhost/report -o get-report.html
 
 if [ "$1" != "ref" ]; then
-  ls ~/htmldump/ref | while read line; do
-    diff -uBw ~/htmldump/ref/$line ~/htmldump/tmp/$line
+  ls ~/htmldump/ref | grep -v "cookie.txt" | while read line; do
+    $DIFF -uBw ~/htmldump/ref/$line ~/htmldump/tmp/$line
   done
 fi
