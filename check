@@ -29,6 +29,6 @@ fi
 if [ "$1" != "ref" ]; then
   cd $SCRIPT_DIR
   ls ./htmldump/ref | grep -v "cookie.txt" | while read line; do
-    $DIFF -uBw ./htmldump/ref/$line ./htmldump/tmp/$line
+    $DIFF ./htmldump/ref/$line ./htmldump/tmp/$line
   done
 fi
