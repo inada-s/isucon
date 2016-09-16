@@ -1,21 +1,55 @@
 package main
 
 import (
+	"bytes"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"runtime"
 	"runtime/pprof"
 	"time"
 )
 
 var (
-	enableProfile    = true
-	isProfiling      = false
-	cpuProfileFile   = "/tmp/cpu.pprof"
-	memProfileFile   = "/tmp/mem.pprof"
-	blockProfileFile = "/tmp/block.pprof"
+	enableProfile     = true
+	isProfiling       = false
+	cpuProfileFile    = "/tmp/cpu.pprof"
+	memProfileFile    = "/tmp/mem.pprof"
+	blockProfileFile  = "/tmp/block.pprof"
+	onStartProfileCmd = "/home/isucon/on-start-profile"
+	onEndProfileCmd   = "/home/isucon/on-end-profile"
 )
+
+func callOnStartProfile() {
+	if _, err := os.Stat(onStartProfileCmd); os.IsNotExist(err) {
+		log.Println("OnStartProfile command not found:", err)
+		return
+	}
+	cmd := exec.Command(onStartProfileCmd)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		log.Println("OnStartProfile command error:", err)
+	}
+	log.Printf("OnStartProfile Output: %s\n", out.String())
+}
+
+func callOnEndProfile() {
+	if _, err := os.Stat(onEndProfileCmd); os.IsNotExist(err) {
+		log.Println("OnEndProfile command not found:", err)
+		return
+	}
+	cmd := exec.Command(onEndProfileCmd)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		log.Println("OnEndProfile command error:", err)
+	}
+	log.Printf("OnEndProfile Output: %s\n", out.String())
+}
 
 func StartProfile(duration time.Duration) error {
 	f, err := os.Create(cpuProfileFile)
@@ -37,6 +71,7 @@ func StartProfile(duration time.Duration) error {
 		}()
 	}
 	log.Println("Profile start")
+	go callOnStartProfile()
 	return nil
 }
 
@@ -48,6 +83,9 @@ func EndProfile() error {
 	pprof.StopCPUProfile()
 	runtime.SetBlockProfileRate(0)
 	log.Println("Profile end")
+	defer func() {
+		go callOnEndProfile()
+	}()
 
 	mf, err := os.Create(memProfileFile)
 	if err != nil {
@@ -64,7 +102,7 @@ func EndProfile() error {
 }
 
 func init() {
-	log.Println("add pprof start end func")
+	log.Println("add handler /startprof /endprof")
 	http.HandleFunc("/startprof", func(w http.ResponseWriter, r *http.Request) {
 		err := StartProfile(time.Minute)
 		if err != nil {
