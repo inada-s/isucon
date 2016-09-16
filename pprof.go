@@ -11,6 +11,16 @@ import (
 	"time"
 )
 
+/*
+func getInitialize(w http.ResponseWriter, r *http.Request) {
+	noprofile := r.URL.Query().Get("noprofile")
+	if noprofile == "" {
+		StartProfile(time.Minute)
+	}
+	...
+}
+*/
+
 var (
 	enableProfile     = true
 	isProfiling       = false
