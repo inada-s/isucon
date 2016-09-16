@@ -1,0 +1,26 @@
+#!/bin/bash +x
+SCRIPT_DIR=$(cd $(dirname $0) && pwd)
+cd $SCRIPT_DIR
+ln -nfs bench-current bench-latest
+BENCH_DIR="bench-latest"
+
+./report > $BENCH_DIR/summary.txt
+go tool pprof -seconds 60 -svg work/webapp/golang/app /tmp/cpu.pprof > $BENCH_DIR/cpu.svg
+go tool pprof -seconds 60 -svg work/webapp/golang/app /tmp/mem.pprof > $BENCH_DIR/mem.svg
+go tool pprof -seconds 60 -svg work/webapp/golang/app /tmp/block.pprof > $BENCH_DIR/block.svg
+go tool pprof -seconds 60 -text work/webapp/golang/app /tmp/cpu.pprof > $BENCH_DIR/cpu.txt
+go tool pprof -seconds 60 -text work/webapp/golang/app /tmp/mem.pprof > $BENCH_DIR/mem.txt
+go tool pprof -seconds 60 -text work/webapp/golang/app /tmp/block.pprof > $BENCH_DIR/block.txt
+go tool pprof -seconds 60 -text -cum work/webapp/golang/app /tmp/cpu.pprof > $BENCH_DIR/cpu-cum.txt
+go tool pprof -seconds 60 -text -cum work/webapp/golang/app /tmp/mem.pprof > $BENCH_DIR/mem-cum.txt
+go tool pprof -seconds 60 -text -cum work/webapp/golang/app /tmp/block.pprof > $BENCH_DIR/block-cum.txt
+go tool pprof -seconds 60 -list=main. work/webapp/golang/app /tmp/cpu.pprof > $BENCH_DIR/cpu.list
+go tool pprof -seconds 60 -list=main. work/webapp/golang/app /tmp/mem.pprof > $BENCH_DIR/mem.list
+go tool pprof -seconds 60 -list=main. work/webapp/golang/app /tmp/block.pprof > $BENCH_DIR/block.list
+go-torch work/webapp/golang/app /tmp/cpu.pprof --seconds 60 --file=$BENCH_DIR/cpu-torch.svg
+go-torch work/webapp/golang/app /tmp/mem.pprof --seconds 60 --file=$BENCH_DIR/mem-torch.svg
+go-torch work/webapp/golang/app /tmp/block.pprof --seconds 60 --file=$BENCH_DIR/block-torch.svg
+cat $BENCH_DIR/pidstat.log | sed '1d;/^[#]/d;/^$/d;s/^[ ]*//g;s/[ ]\+/,/g' > $BENCH_DIR/pidstat.csv
+
+sudo mysqldumpslow -t 10 -s t /var/log/mysql/mysql-slow.log > $BENCH_DIR/mysql.txt
+python make_report.py $BENCH_DIR > $BENCH_DIR/index.html

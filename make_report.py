@@ -1,6 +1,7 @@
 import csv
 import os
 import sys
+import cgi
 
 def print_mysql_result(out):
     out.write("<h2>MySQL Slow Queries</h2>")
@@ -10,7 +11,24 @@ def print_mysql_result(out):
     with open('mysql.txt') as f:
         out.write("""<pre class="prettyprint">""")
         for line in f.readlines():
-            out.write(line)
+            out.write(cgi.escape(line))
+        out.write("</pre>")
+
+def print_myprofiler_result(out):
+    out.write("<h2>myprofiler</h2>")
+    if not os.path.exists('myprofiler.log'):
+        out.write("<p>myprofiler.log not found.</p>")
+        return
+    with open('myprofiler.log') as f:
+        out.write("""<pre class="prettyprint">""")
+        lines = f.readlines()
+        idx = 0
+        for i in xrange(len(lines)):
+            line = lines[i]
+            if line[0].startswith("#"):
+                idx = i
+        for line in lines[idx:]:
+            out.write(cgi.escape(line))
         out.write("</pre>")
 
 def print_bench_result(out):
@@ -21,7 +39,7 @@ def print_bench_result(out):
     with open('bench.txt') as f:
         out.write("""<pre class="prettyprint">""")
         for line in f.readlines():
-            out.write(line)
+            out.write(cgi.escape(line))
         out.write("</pre>")
 
 def print_summary(out):
@@ -36,10 +54,10 @@ def print_summary(out):
                 if opened:
                     out.write("</small></pre>")
                 sys.stdout.write("""<pre class="col-md-4 prettyprint lang-sh"><small>""")
-                out.write(line)
+                out.write(cgi.escape(line))
                 opened = True
             else:
-                out.write(line)
+                out.write(cgi.escape(line))
         if opened:
             out.write("</small></pre>")
 
@@ -119,6 +137,7 @@ def print_dstat_report(out):
                 vAxis: {minValue: 0},
 	        legend: {position: 'top', maxLines: 3},
                 backgroundColor: { fill:'transparent' },
+                isStacked: true,
             });""")
 
     if mem_csv:
@@ -155,6 +174,99 @@ def print_dstat_report(out):
                 vAxis: {minValue: 0},
 	        legend: {position: 'top', maxLines: 3},
                 backgroundColor: { fill:'transparent' },
+            });""")
+
+    out.write("""
+     }
+     </script>
+    """)
+
+def parse_pidstat_report():
+    if not os.path.exists('pidstat.csv'):
+        out.write("<p>pidstat.csv not found.</p>")
+        return
+
+    table = {}
+    cmds = set()
+    with open('pidstat.csv') as f:
+        r = csv.reader(f)
+        for line in r:
+            t = line[0]
+            cmd = line[-1]
+            if t not in table:
+                table[t] = {}
+            cmds.add(cmd)
+            table[t][cmd] = (line[6], line[-2])
+
+    cmds = sorted(list(cmds))
+
+    cpu = []
+    cpu.append(["Time"] + cmds)
+
+    mem = []
+    mem.append(["Time"] + cmds)
+
+    for t in table:
+        line_cpu = [t]
+        line_mem = [t]
+        for cmd in cmds:
+            if cmd in table[t]:
+                line_cpu.append(float(table[t][cmd][0]))
+                line_mem.append(float(table[t][cmd][1]))
+            else:
+                line_cpu.append(0)
+                line_mem.append(0)
+        cpu.append(line_cpu)
+        mem.append(line_mem)
+    return cpu, mem
+
+
+def print_pidstat_report(out):
+    cpu_csv, mem_csv = parse_pidstat_report()
+
+    out.write(u"""
+      <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var charts = document.getElementById('charts')""")
+
+    if cpu_csv:
+        out.write("""
+            var div = document.createElement("div");
+            div.setAttribute("class", "col-md-4")
+            charts.appendChild(div);
+            var chart = new google.visualization.AreaChart(div);
+            chart.draw(google.visualization.arrayToDataTable([""")
+        for line in cpu_csv:
+            out.write("%r,\n" % line)
+        out.write("""]), {
+                title: '%cpu',
+	        width: 400,
+	        height: 240,
+                vAxis: {minValue: 0},
+	        legend: {position: 'top', maxLines: 3},
+                backgroundColor: { fill:'transparent' },
+                isStacked: true,
+            });""")
+
+    if mem_csv:
+        out.write("""
+            var div = document.createElement("div");
+            div.setAttribute("class", "col-md-4")
+            charts.appendChild(div);
+            var chart = new google.visualization.AreaChart(div);
+            chart.draw(google.visualization.arrayToDataTable([""")
+        for line in mem_csv:
+            out.write("%r,\n" % line)
+        out.write("""]), {
+                title: '%mem',
+	        width: 400,
+	        height: 240,
+                vAxis: {minValue: 0},
+	        legend: {position: 'top', maxLines: 3},
+                backgroundColor: { fill:'transparent' },
+                isStacked: true,
             });""")
 
     out.write("""
@@ -199,11 +311,11 @@ def print_app_profiles(out):
         out.write("</pre>")
     with open('cpu.list') as f:
         r = split_by_rountine(f)
-        for rountine in r[:min(3, len(r))]:
+        for rountine in r[:min(5, len(r))]:
             out.write("<h3>[CPU] %s%% %s</h3>" % (rountine[0], rountine[1]))
             out.write("""<pre class="prettyprint">""")
             for line in rountine[2]:
-                out.write(line[10:])
+                out.write(cgi.escape(line[10:]))
             out.write("</pre>")
 
     out.write("""<h2>MEM Profile (<a href="mem.svg">pprof SVG</a>) (<a href="mem-torch.svg">FlameGraph SVG</a>)</h2>""")
@@ -225,7 +337,7 @@ def print_app_profiles(out):
             out.write("<h3>[MEM] %s%% %s</h3>" % (rountine[0], rountine[1]))
             out.write("""<pre class="prettyprint">""")
             for line in rountine[2]:
-                out.write(line[10:])
+                out.write(cgi.escape(line[10:]))
             out.write("</pre>")
 
     out.write("""<h2>BLOCK Profile (<a href="block.svg">pprof SVG</a>) (<a href="block-torch.svg">FlameGraph SVG</a>)</h2>""")
@@ -247,7 +359,7 @@ def print_app_profiles(out):
             out.write("<h3>[BLOCK] %s%% %s</h3>" % (rountine[0], rountine[1]))
             out.write("""<pre class="prettyprint">""")
             for line in rountine[2]:
-                out.write(line[10:])
+                out.write(cgi.escape(line[10:]))
             out.write("</pre>")
 
 def main():
@@ -266,6 +378,7 @@ def main():
   <style></style>
 """)
     print_dstat_report(out)
+    print_pidstat_report(out)
     out.write(u"""
   </head>
   <body>
@@ -276,6 +389,7 @@ def main():
     print_bench_result(out)
     print_summary(out)
     print_mysql_result(out)
+    print_myprofiler_result(out)
     print_app_profiles(out)
     out.write(u"""
   </div>

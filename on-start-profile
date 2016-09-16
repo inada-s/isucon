@@ -1,0 +1,11 @@
+#!/bin/bash +x
+SCRIPT_DIR=$(cd $(dirname $0) && pwd)
+cd $SCRIPT_DIR
+BENCH_DIR=$SCRIPT_DIR/bench-$(date '+%Y%m%d%H%M%S')
+
+mkdir -p $BENCH_DIR
+ln -nfs $BENCH_DIR bench-current
+(timeout 60 dstat -tam --output=$BENCH_DIR/dstat.csv >/dev/null 2>&1 &)
+(timeout 60 pidstat -C 'nginx|mysql|app' -hur -p ALL 1 > $BENCH_DIR/pidstat.log &)
+(timeout 60 myprofiler -user root > $BENCH_DIR/myprofiler.log &)
+

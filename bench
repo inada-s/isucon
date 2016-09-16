@@ -7,12 +7,14 @@ mkdir -p $BENCH_DIR
 
 ./restart
 sleep 3
-dstat -tam --output=$BENCH_DIR/dstat.csv >/dev/null 2>&1 & 
-echo $! > dstat.pid
+(timeout 60 dstat -tam --output=$BENCH_DIR/dstat.csv >/dev/null 2>&1 &)
+(timeout 60 pidstat -C 'nginx|mysql|app' -hur -p ALL 1 > $BENCH_DIR/pidstat.log &)
+(timeout 60 myprofiler -user root > $BENCH_DIR/myprofiler.log &)
+
 curl http://localhost:6060/startprof
 /home/isucon/work/benchmarker -t http://127.0.0.1/ -u /home/isucon/work/userdata | tee $BENCH_DIR/bench.txt
 curl http://localhost:6060/endprof
-kill $(cat dstat.pid)
+
 ./report > $BENCH_DIR/summary.txt
 go tool pprof -svg webapp/golang/app /tmp/cpu.pprof > $BENCH_DIR/cpu.svg
 go tool pprof -svg webapp/golang/app /tmp/mem.pprof > $BENCH_DIR/mem.svg
