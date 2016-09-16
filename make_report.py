@@ -181,10 +181,10 @@ def print_dstat_report(out):
      </script>
     """)
 
-def parse_pidstat_report():
+def parse_pidstat_report(out):
     if not os.path.exists('pidstat.csv'):
         out.write("<p>pidstat.csv not found.</p>")
-        return
+        return None, None
 
     table = {}
     cmds = set()
@@ -220,9 +220,46 @@ def parse_pidstat_report():
         mem.append(line_mem)
     return cpu, mem
 
+def parse_netstat_result(out):
+    if not os.path.exists('netstat.log'):
+        out.write("<p>netstat.log not found.</p>")
+        return
+
+    sep = []
+    states = set()
+    with open('netstat.log') as f:
+        counter = {}
+        for line in f:
+            s = line.strip().split()
+            if s[0].startswith('tcp'):
+                if s[-1].isupper():
+                    states.add(s[-1])
+                    if s[-1] not in counter:
+                        counter[s[-1]] = 0
+                    counter[s[-1]] += 1
+            elif counter:
+                sep.append(counter)
+                counter = {}
+
+    states = sorted(list(states))
+    ret = []
+    ret.append(["Seq"] + states)
+
+    i = 0
+    for counter in sep:
+        line = [i]
+        for s in states:
+            if s in counter:
+                line.append(counter[s])
+            else:
+                line.append(0)
+        i += 1
+        ret.append(line)
+    return ret
 
 def print_pidstat_report(out):
-    cpu_csv, mem_csv = parse_pidstat_report()
+    cpu_csv, mem_csv = parse_pidstat_report(out)
+    tcp_csv = parse_netstat_result(out)
 
     out.write(u"""
       <script type="text/javascript">
@@ -267,6 +304,24 @@ def print_pidstat_report(out):
 	        legend: {position: 'top', maxLines: 3},
                 backgroundColor: { fill:'transparent' },
                 isStacked: true,
+            });""")
+
+    if tcp_csv:
+        out.write("""
+            var div = document.createElement("div");
+            div.setAttribute("class", "col-md-4")
+            charts.appendChild(div);
+            var chart = new google.visualization.AreaChart(div);
+            chart.draw(google.visualization.arrayToDataTable([""")
+        for line in tcp_csv:
+            out.write("%r,\n" % line)
+        out.write("""]), {
+                title: 'tcp',
+	        width: 400,
+	        height: 240,
+                vAxis: {minValue: 0, format: 'short'},
+	        legend: {position: 'top', maxLines: 3},
+                backgroundColor: { fill:'transparent' },
             });""")
 
     out.write("""
@@ -369,6 +424,7 @@ def main():
 <!DOCTYPE HTML>
 <html>
   <head>
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>

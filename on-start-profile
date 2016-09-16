@@ -8,4 +8,5 @@ ln -nfs $BENCH_DIR bench-current
 (timeout 60 dstat -tam --output=$BENCH_DIR/dstat.csv >/dev/null 2>&1 &)
 (timeout 60 pidstat -C 'nginx|mysql|app' -hur -p ALL 1 > $BENCH_DIR/pidstat.log &)
 (timeout 60 myprofiler -user root > $BENCH_DIR/myprofiler.log &)
+(timeout 60 netstat -a --tcp -c > $BENCH_DIR/netstat.log &)
 
