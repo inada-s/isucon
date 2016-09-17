@@ -122,6 +122,21 @@ ALTER TABLE posts DROP INDEX created_at_idx;
 同じパッケージ内に新しくファイルを作って実装する.  
 そこで作った関数をメインのgoファイルで呼び出す形にする.
 
+## mysqlとの接続
+```
+dsn := fmt.Sprintf(
+	"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local&interpolateParams=true",
+	user,
+	password,
+	host,
+	port,
+	dbname,
+)
+db, err = sqlx.Open("mysql", dsn)
+db.SetMaxIdleConns(16)
+db.SetMaxOpenConns(16)
+```
+
 ## データのオンメモリ化
 データの使い方を良く見て考えてデータ構造を作る.
 
