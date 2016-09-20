@@ -120,11 +120,20 @@ ALTER TABLE posts ADD INDEX created_at_idx(created_at);
 ALTER TABLE posts ADD INDEX index_posts_on_created_at_updated_at(created_at, updated_at);
 ```
 
+ユニークインデックス
+```
+ALTER TABLE mytable ADD UNIQUE(id);
+```
+
 削除
 ```
 ALTER TABLE posts DROP INDEX created_at_idx;
 ```
 
+確認
+```
+SHOW INDEX FROM mydb.mytable;
+```
 
 # golang
 ## コンフリクトしにくい編集
