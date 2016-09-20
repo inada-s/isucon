@@ -100,6 +100,15 @@ innodb_flush_log_at_trx_commit=0
 skip-innodb_doublewrite
 ```
 
+## ダンプとリストア
+```
+mysqldump -uroot db_name | gzip > db_name.dump.sql.gz
+```
+
+```
+zcat db_name.dump.sql.gz | mysql -uroot dbname 
+```
+
 ## インデックス
 追加
 ```
