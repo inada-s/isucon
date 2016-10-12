@@ -319,7 +319,11 @@ tempfileに書き出して, 書き終わってからrenameすること.
     if err != nil {                                                                                   
         log.Fatalln(err)                                                                              
     }
-    topHandlerMain(ctx, f, 1)                                                                         
+    topHandlerMain(ctx, f, 1)
+    err = os.Chmod(f.Name(), 0777)
+    if err != nil {
+        log.Println(err)                                                                              
+    }
     err = os.Rename(f.Name(), path.Join(filePath, "index.html"))
     if err != nil {
         log.Fatalln(err)                                                                              
