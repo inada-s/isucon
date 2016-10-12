@@ -141,7 +141,7 @@ SHOW INDEX FROM mydb.mytable;
 そこで作った関数をメインのgoファイルで呼び出す形にする.
 
 ## mysqlとの接続
-```
+```go
 dsn := fmt.Sprintf(
 	"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local&interpolateParams=true",
 	user,
@@ -163,7 +163,7 @@ mutexとmapで持って, のGet, Set, Updateの関数を提供し直接mapを触
 ポインタを使うとメモリやコピーコストを節約できるかもしれないけど, ハマらないで済むので基本オブジェクトをそのまま持つ.  
 DBを操作する部分を調べて関数を差しこむなり入れ替えるなり.
 
-```
+```go
 var (
 	userRepoM sync.Mutex
 	userRepo  map[int]User
@@ -211,7 +211,7 @@ func usersReset() {
 ちょっと書き換えれば他のライブラリにも対応可能.
 
 メモリに余裕があるならユーザ情報まるまるセッションにも持っておくと良さそう
-```
+```go
 const sessionName = "isucon_session"
 
 type Session struct {
@@ -278,7 +278,7 @@ func (self *SessionStore) Set(w http.ResponseWriter, sess *Session) {
 
 1秒猶予のレギュレーションが無い場合, 毎回レンダリングすることになるが, 更新系リクエストのレスポンスを返す前にレンダリングしてしまえばいい.
 
-```
+```go
 var (
 	indexRenderedMtx sync.Mutex
 	indexRendered    []byte
@@ -307,6 +307,5 @@ DB周りの基本的なチューニングが済んでくるとたいてい, テ�
 go run tpl_conv.go < index.html > index.gotpl
 
 あとは手修正でがんばる.
-
 
 
