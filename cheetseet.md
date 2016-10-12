@@ -326,4 +326,7 @@ tempfileに書き出して, 書き終わってからrenameすること.
     }
 ```
 
-
+# その他
+```bash
+sudo journalctl -fu isuda.go
+```
