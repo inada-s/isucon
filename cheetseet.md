@@ -308,4 +308,22 @@ go run tpl_conv.go < index.html > index.gotpl
 
 あとは手修正でがんばる.
 
+## 静的ページ化
+非ログインユーザに表示する内容が同一の場合ファイルに書き出してしまってnginxから返す.  
+tempfileに書き出して, 書き終わってからrenameすること.
+
+```go
+    const filePath = "/home/isucon/webapp/public"                                                     
+    ctx := context.Background()                                                                       
+    f, err := ioutil.TempFile(filePath, "toptmp")                                  
+    if err != nil {                                                                                   
+        log.Fatalln(err)                                                                              
+    }
+    topHandlerMain(ctx, f, 1)                                                                         
+    err = os.Rename(f.Name(), path.Join(filePath, "index.html"))
+    if err != nil {
+        log.Fatalln(err)                                                                              
+    }
+```
+
 
