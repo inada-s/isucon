@@ -1,4 +1,5 @@
 #!/bin/bash -x
+TARGET_HOST='52.198.216.223'
 SCRIPT_DIR=$(cd $(dirname $0) && pwd)
 cd $SCRIPT_DIR
 
@@ -13,13 +14,23 @@ else
   cd ./htmldump/tmp
 fi
 
-#curl localhost/initialize
-CURL="curl -sSLc cookie.txt -w %{time_total}\\n"
-$CURL localhost -o get-index.html
-$CURL -d "login=isucon1" -d "password=isuconpass1" http://localhost/login -o post-login-ok.html
-$CURL localhost/mypage -o get-mypage.html
-$CURL localhost -o get-index2.html
-$CURL localhost/report -o get-report.html
+curl $TARGET_HOST/initialize?noprofile=1
+CURL="curl -sSL -b cookie.txt -c cookie.txt -w 'status:%{http_code}\ttime:%{time_total}\tsize:%{size_download}\\n'"
+$CURL $TARGET_HOST -o get-index.html
+$CURL $TARGET_HOST/login -o get-login.html
+$CURL $TARGET_HOST/register -o get-login.html
+$CURL -d "account_name=checker" -d "password=checker" $TARGET_HOST/register -o post-register-ok.html
+$CURL -d "account_name=checker" -d "password=checker" $TARGET_HOST/login -o post-login-ok.html
+$CURL $TARGET_HOST -o get-index2.html
+#$CURL -d "name=isucon123" -d "password=isucon123" $TARGET_HOST/register -o post-register-ok.html
+#$CURL -d "name=isucon123" -d "password=isucon123" $TARGET_HOST/login -o post-login-ok.html
+#$CURL -d "name=motemen" -d "password=motemen" $TARGET_HOST/login -o post-login-ok.html
+#$CURL $TARGET_HOST -o get-index2.html
+#$CURL --data-urlencode "keyword=技術" --data-urlencode "description=技術のでぃすくりぷしょん" $TARGET_HOST/keyword -o post-keyword-ok.html
+
+#$CURL $TARGET_HOST/mypage -o get-mypage.html
+#$CURL $TARGET_HOST -o get-index2.html
+#$CURL $TARGET_HOST/report -o get-report.html
 
 DIFF='diff -uBw'
 if [[ -x `which colordiff` ]]; then
