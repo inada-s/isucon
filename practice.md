@@ -7,8 +7,8 @@ sudo useradd isucon
 sudo passwd isucon
 sudo usermod -G wheel isucon
 
-curl https://github.com/inada-s.keys | sudo tee -a /home/isucon/.ssh/authorized_keys
 sudo mkdir -p /home/isucon/.ssh
+curl https://github.com/inada-s.keys | sudo tee -a /home/isucon/.ssh/authorized_keys
 sudo chown -R isucon:isucon /home/isucon/.ssh
 sudo chmod 700 /home/isucon/.ssh
 sudo chmod 600 /home/isucon/.ssh/authorized_keys
