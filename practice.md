@@ -101,6 +101,13 @@ sudo systemctl enable nginx
 sudo systemctl start nginx
 ```
 
+## MySQL設定
+```sh
+CREATE USER 'isucon'@'localhost' IDENTIFIED BY 'isucon';
+GRANT ALL PRIVILEGES ON *.* TO 'isucon'@'localhost';
+FLUSH PRIVILEGES;
+```
+
 ## Firewall
 多分不要
 ```sh
