@@ -1,5 +1,24 @@
 CentOS用練環境構築
 
+## Systemd
+```sh
+sudo systemctl daemon-reload
+
+sudo systemctl enable nginx
+sudo systemctl disable nginx
+
+sudo systemctl restart nginx
+sudo systemctl start nginx
+sudo systemctl stop nginx
+
+sudo systemctl status nginx
+
+sudo journalctl -u nginx
+sudo journalctl -f -u nginx
+
+sudo systemctl list-unit-files -t service
+```
+
 ## isuconユーザ作成
 ```sh
 sudo yum install -y curl
