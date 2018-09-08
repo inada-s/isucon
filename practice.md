@@ -1,4 +1,4 @@
-練習用環境の構築
+CentOS用練環境構築
 
 ## isuconユーザ作成
 ```sh
@@ -17,7 +17,7 @@ sudo yum -y update
 sudo reboot
 ```
 
-## isuconユーザで作業
+## Moromoro
 ```sh
 sudo yum groupinstall -y "Development Tools"
 sudo yum install -y kernel-devel kernel-headers
@@ -74,4 +74,18 @@ sudo yum install mysql-server
 sudo systemctl start mysqld
 ```
 
+## MySQL
+```
+sudo yum install epel-release
+sudo yum install nginx
+sudo systemctl enable nginx
+sudo systemctl start nginx
+```
 
+## Firewall
+多分不要
+```sh
+sudo firewall-cmd --permanent --zone=public --add-service=http 
+sudo firewall-cmd --permanent --zone=public --add-service=https
+sudo firewall-cmd --reload
+```
