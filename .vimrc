@@ -52,17 +52,6 @@ set ffs=unix,dos,mac
 let mapleader = "\<Space>"
 let g:mapleader = "\<Space>"
 
-"vim -b Option binary mode setting
-augroup BinaryXXD
-        autocmd!
-        autocmd BufReadPre  *.bin let &binary =1
-        autocmd BufReadPost * if &binary | silent %!xxd -g 1
-        autocmd BufReadPost * set ft=xxd | endif
-        autocmd BufWritePre * if &binary | %!xxd -r | endif
-        autocmd BufWritePost * if &binary | silent %!xxd -g 1
-        autocmd BufWritePost * set nomod | endif
-augroup END
-
 "Auto quickfix
 au QuickfixCmdPost make,grep,grepadd,vimgrep copen
 "Fix Quickfix color
