@@ -65,11 +65,13 @@ vim +NeoBundleInstall  +qall
 vim +GoInstallBinaries +qall
 ```
 
-## openresty
+## MySQL
 ```sh
-sudo yum -y install yum-utils
-sudo yum-config-manager --add-repo https://openresty.org/package/centos/openresty.repo
-sudo yum -y install openresty openresty-resty
+wget http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
+sudo rpm -ivh mysql-community-release-el7-5.noarch.rpm
+yum update
+sudo yum install mysql-server
+sudo systemctl start mysqld
 ```
 
 
