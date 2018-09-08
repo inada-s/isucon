@@ -93,19 +93,19 @@ sudo yum -y install mysql-server
 sudo systemctl start mysqld
 ```
 
-## MySQL
-```
-sudo yum install epel-release
-sudo yum install nginx
-sudo systemctl enable nginx
-sudo systemctl start nginx
-```
-
 ## MySQL設定
 ```sh
 CREATE USER 'isucon'@'localhost' IDENTIFIED BY 'isucon';
 GRANT ALL PRIVILEGES ON *.* TO 'isucon'@'localhost';
 FLUSH PRIVILEGES;
+```
+
+## Nginx
+```
+sudo yum install epel-release
+sudo yum install nginx
+sudo systemctl enable nginx
+sudo systemctl start nginx
 ```
 
 ## Firewall
