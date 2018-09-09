@@ -360,3 +360,22 @@ func CreateStaticFile(filePath, fileName string, writeFunc func(io.Writer)) {
 sudo journalctl -fu isuda.go
 sudo systemctl restart isuda.go
 ```
+
+複数ホストにtailしたりする
+```sh
+#!/bin/bash -ex
+cd $(dirname $0)
+
+function kill_children {
+  pkill -P $$
+  wait
+}
+trap "kill_children" EXIT
+
+ssh app "sudo journalctl -f -u isuda.go" &
+ssh app "sudo journalctl -f -u isutar.go" &
+ssh app "sudo journalctl -f -u nginx" &
+ssh app "sudo journalctl -f -u mysql" &
+wait
+
+```
