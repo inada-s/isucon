@@ -1,5 +1,11 @@
 CentOS用練環境構築
 
+## SELinux無効化
+```
+sudo vim /etc/selinux/config
+SELINUX=disabled
+```
+
 ## Systemd
 ```sh
 sudo systemctl daemon-reload
