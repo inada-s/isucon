@@ -7,6 +7,13 @@ sudo vim /etc/selinux/config
 sudo reboot
 ```
 
+## パスワードなしsudo
+```
+sudo visudo
+# %group        ALL=(ALL)       NOPASSWD: ALL
+isucon        ALL=(ALL)       NOPASSWD: ALL
+```
+
 ## Systemd
 ```sh
 sudo systemctl daemon-reload
