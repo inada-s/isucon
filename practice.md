@@ -110,10 +110,22 @@ sudo systemctl enable mysqld
 ```
 
 ## MySQL設定
-```sh
+```sql
 CREATE USER 'isucon'@'localhost' IDENTIFIED BY 'isucon';
 GRANT ALL PRIVILEGES ON *.* TO 'isucon'@'localhost';
 FLUSH PRIVILEGES;
+
+```
+
+古い認証方式に戻す
+```sql
+ALTER USER 'isucon'@'localhost' IDENTIFIED WITH mysql_native_password BY 'isucon';
+```
+
+ユーザ作成から変える場合
+```
+[mysqld]
+default-authentication-plugin = mysql_native_password
 ```
 
 ## Nginx
