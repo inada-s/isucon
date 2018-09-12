@@ -136,6 +136,15 @@ sudo systemctl enable nginx
 sudo systemctl start nginx
 ```
 
+## Memcache
+```sh
+sudo yum -y install memcached
+#sudo vim /etc/sysconfig/memcached
+sudo systemctl enable memcached
+sudo systemctl start memcached
+```
+
+
 ## Firewall
 多分不要
 ```sh
