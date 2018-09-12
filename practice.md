@@ -76,6 +76,7 @@ cat << EOF >> ~/.bash_profile
 export PATH=$PATH:/usr/local/go/bin:$GOBIN
 export GOPATH=$GOPATH
 EOF
+source ~/.bash_profile
 ```
 
 ## Vim
