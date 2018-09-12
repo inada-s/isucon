@@ -106,6 +106,7 @@ sudo rpm -ivh mysql-community-release-el7-5.noarch.rpm
 sudo yum -y update
 sudo yum -y install mysql-server
 sudo systemctl start mysqld
+sudo systemctl enable mysqld
 ```
 
 ## MySQL設定
