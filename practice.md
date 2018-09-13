@@ -122,10 +122,16 @@ FLUSH PRIVILEGES;
 ALTER USER 'isucon'@'localhost' IDENTIFIED WITH mysql_native_password BY 'isucon';
 ```
 
-ユーザ作成から変える場合
 ```
 [mysqld]
 default-authentication-plugin = mysql_native_password
+```
+
+## myprofiler
+```sh
+wget https://github.com/KLab/myprofiler/releases/download/0.1/myprofiler.linux_amd64.tar.gz
+tar xf myprofiler.linux_amd64.tar.gz
+sudo mv myprofiler /usr/local/bin/
 ```
 
 ## Nginx
