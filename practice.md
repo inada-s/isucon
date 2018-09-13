@@ -152,3 +152,26 @@ sudo firewall-cmd --permanent --zone=public --add-service=http
 sudo firewall-cmd --permanent --zone=public --add-service=https
 sudo firewall-cmd --reload
 ```
+
+
+## pprof
+
+```sh
+for isu in $ISUS; do
+  ssh $isu 'sudo yum install -y dstat sysstat'
+done
+```
+
+```sh
+scp on-start-profile $isu:on-start-profile
+```
+
+pprof.goを貼り付けて make deploy restart
+ログを見ながら
+```sh
+curl isu1/startprof
+curl isu1/endprof
+```
+を叩いて正しくプロファイル関係のファイルが収集できてるか確認
+
+
