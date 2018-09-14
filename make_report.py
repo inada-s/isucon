@@ -232,11 +232,13 @@ def parse_netstat_result(out):
         for line in f:
             s = line.strip().split()
             if s[0].startswith('tcp'):
-                if s[-1].isupper():
-                    states.add(s[-1])
-                    if s[-1] not in counter:
-                        counter[s[-1]] = 0
-                    counter[s[-1]] += 1
+                for i in range(1, len(s)):
+                    x = s[-i]
+                    if x.isupper():
+                        states.add(x)
+                        if x not in counter:
+                            counter[x] = 0
+                        counter[x] += 1
             elif counter:
                 sep.append(counter)
                 counter = {}
