@@ -153,6 +153,33 @@ SHOW INDEX FROM mydb.mytable;
 同じパッケージ内に新しくファイルを作って実装する.  
 そこで作った関数をメインのgoファイルで呼び出す形にする.
 
+## NGINXとの通信をUnixDomainSocket化
+```sh
+APP_PORT=8080
+APP_UNIX_SOCKET=/var/lib/torb/torb.sock
+```
+
+```go
+appPort := os.Getenv("APP_PORT")
+if appPort == "" {
+	appPort = "8080"
+}
+
+unixSocket := os.Getenv("APP_UNIX_SOCKET")
+if unixSocket != "" {
+	os.Remove(unixSocket)
+	l, err := net.Listen("unix", unixSocket)
+	if err != nil {
+		e.Logger.Fatal(err)
+	}
+	os.Chmod(unixSocket, 0777)
+	e.Listener = l
+	e.Start("")
+} else {
+	e.Start(":" + appPort)
+}
+```
+
 ## mysqlとの接続
 ```go
 dsn := fmt.Sprintf(
@@ -167,6 +194,7 @@ db, err = sqlx.Open("mysql", dsn)
 db.SetMaxIdleConns(16)
 db.SetMaxOpenConns(16)
 ```
+
 
 ## データのオンメモリ化
 データの使い方を良く見て考えてデータ構造を作る.
@@ -372,6 +400,7 @@ function kill_children {
 }
 trap "kill_children" EXIT
 
+# TODO:ssh先でプロセス残っちゃうのでなんとかしたい.
 ssh app "sudo journalctl -f -u isuda.go" &
 ssh app "sudo journalctl -f -u isutar.go" &
 ssh app "sudo journalctl -f -u nginx" &
@@ -379,3 +408,5 @@ ssh app "sudo journalctl -f -u mysql" &
 wait
 
 ```
+
+
