@@ -1,5 +1,19 @@
 package main
 
+/*
+# /initializeプロファイルチ開始する場合
+func getInitialize(w http.ResponseWriter, r *http.Request) {
+	noprofile := r.URL.Query().Get("noprofile")
+	if noprofile == "" {
+		StartProfile(time.Minute)
+	}
+	...
+}
+
+# curlでプロファイル開始する場合
+curl localhost:8081/startprof
+*/
+
 import (
 	"bytes"
 	"log"
@@ -10,16 +24,6 @@ import (
 	"runtime/pprof"
 	"time"
 )
-
-/*
-func getInitialize(w http.ResponseWriter, r *http.Request) {
-	noprofile := r.URL.Query().Get("noprofile")
-	if noprofile == "" {
-		StartProfile(time.Minute)
-	}
-	...
-}
-*/
 
 var (
 	enableProfile     = true
@@ -62,6 +66,9 @@ func callOnEndProfile() {
 }
 
 func StartProfile(duration time.Duration) error {
+	if !enableProfile {
+		return nil
+	}
 	f, err := os.Create(cpuProfileFile)
 	if err != nil {
 		return err
@@ -69,7 +76,7 @@ func StartProfile(duration time.Duration) error {
 	if err := pprof.StartCPUProfile(f); err != nil {
 		return err
 	}
-	runtime.SetBlockProfileRate(1)
+	runtime.SetBlockProfileRate(1000)
 	isProfiling = true
 	if 0 < duration.Seconds() {
 		go func() {
@@ -129,4 +136,10 @@ func init() {
 			w.Write([]byte(err.Error() + "\n"))
 		}
 	})
+
+	go func() {
+		if err := http.ListenAndServe(":8081", nil); err != nil {
+			log.Println("ListenAndServe: ", err)
+		}
+	}()
 }
