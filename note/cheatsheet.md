@@ -180,6 +180,23 @@ if unixSocket != "" {
 }
 ```
 
+http.Serve
+```go
+  // /var/lib/app/app.sock固定
+  unixPath := "/var/lib/app/app.sock"
+  os.Remove(unixPath)
+  listener, err := net.Listen("unix", unixPath)
+  if err != nil {
+    log.Fatalf("error: %v", err)
+  }
+  defer func() {
+    if err := listener.Close(); err != nil {
+      log.Printf("error: %v", err)
+    }
+  }()
+  log.Fatal(http.Serve(listener, r))
+```
+
 ## mysqlとの接続
 ```go
 dsn := fmt.Sprintf(
