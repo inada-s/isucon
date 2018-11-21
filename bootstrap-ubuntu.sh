@@ -9,9 +9,10 @@ sudo mv FlameGraph-master/* /usr/local/bin/
 rm -rf FlameGraph-master
 
 # INSTALL golang
-wget https://storage.googleapis.com/golang/go1.7.1.linux-amd64.tar.gz
+#wget https://storage.googleapis.com/golang/go1.7.1.linux-amd64.tar.gz
+wget https://dl.google.com/go/go1.11.2.linux-amd64.tar.gz
 sudo tar -C /usr/local -xzf go1.7.1.linux-amd64.tar.gz
-rm go1.7.1.linux-amd64.tar.gz
+rm go1.11.2.linux-amd64.tar.gz
 
 GOPATH=~/go
 GOBIN=~/go/bin
